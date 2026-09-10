@@ -58,3 +58,71 @@ false positives. For dependable human recognition, fuse this with a camera,
 thermal sensor, or multi-frame leg tracker.
 
 Run `python ld19_radar.py --help` to see every threshold.
+
+ClearCore motor test and person tracking
+
+clearcore_motor_controller.ino replaces the supplied motor sketch while
+preserving its pin assignments. Flash it to ClearCore first. Keep the dog raised,
+use a physical power cutoff, and start with the low MOTOR_PWM value already in
+the sketch. Its calibration procedure assumes the zero sensor behaves exactly as
+it did in the supplied sketch: the clockwise span between sensor transitions is
+180 degrees.
+
+Connect both USB devices to the Pi and identify them:
+
+python -m serial.tools.list_ports -v
+
+Then run:
+
+python pi_lidar_motor_control.py \
+  --lidar-port /dev/ttyUSB0 \
+  --motor-port /dev/ttyACM0
+
+Do not assume those device names; use the names shown on your Pi. The two ports
+must be different.
+
+Keyboard controls:
+
+Key                     Function
+
+H                     Run the bounded 180-degree calibration/home procedure
+
+E                     Enable position commands after successful homing
+
+X                     Disable motor output and automatic mode
+
+Left / A              Manual 2-degree move left
+
+Right / D             Manual 2-degree move right
+
+C                     Move to the 90-degree center
+
+T                     Toggle automatic closest-human-candidate tracking
+
+Space                 Stop and leave automatic mode
+
+Q                     Stop, disable, and exit
+
+Safe first test order:
+
+Raise and secure the dog; have physical power removal within reach.
+
+Start the Pi program. The motor begins disabled.
+
+Press H and verify calibration stops at the expected boundary.
+
+Press E, use one left/right jog, and verify direction.
+
+Test both 0- and 180-degree software limits and the Space stop.
+
+Kill the Pi process while moving; ClearCore must disable within 0.5 seconds.
+
+Run with motor disabled and observe candidate selection on the radar.
+
+Only after all earlier tests pass, press E and then T for slow tracking.
+
+If the motor moves opposite the displayed person, restart with
+--invert-motor. Automatic mode accepts only 0-180 degree LiDAR points farther
+than one foot, confirms a candidate over multiple frames, limits each command to
+two degrees, and stops after target loss. A 2D LiDAR human label remains a
+geometric candidate and can mistake furniture for a person.
