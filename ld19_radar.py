@@ -150,8 +150,8 @@ class LD19:
     def _decode(packet: bytes) -> list[Point]:
         """Decode the 12 measurements contained in one packet."""
 
-        start_angle = struct.unpack_from("<H", packet, 4)[0] / 100.0
-        end_angle = struct.unpack_from("<H", packet, 42)[0] / 100.0
+        start_angle = struct.unpack_from("<H", packet, 4)[0] / 100.0 + 90
+        end_angle = struct.unpack_from("<H", packet, 42)[0] / 100.0 + 90
 
         # Handle the transition from 359 degrees back to 0 degrees.
         angle_span = (end_angle - start_angle) % 360.0
